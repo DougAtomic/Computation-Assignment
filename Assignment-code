@@ -1,0 +1,107 @@
+import os # Library to allow operating system interaction
+import statistics # Library to allow statistical operations
+import pandas # Library for data handling
+import matplotlib # Library for data presentation
+import matplotlib.pyplot as plt
+import seaborn as sbn # Module for matplotlib
+
+#Global variables
+gene_list=[]
+list_count=0 #Number of 
+data_path = r"datafiles" # Folder where data files are stored
+file_list = os.listdir(data_path) # Present all files in this folder as list
+
+#All data files have the same structure and each value is separated by whitespace
+#There are 42 elements in each file
+#"Indexing and slicing..."
+
+#Workflow:
+#Create data_list and populate it
+#Open file > Split string into two lists: indices and values > Combine key and value lists into a dictionary > Store the dictionary into gene_list
+
+
+                    #1. #Count the number of data files in ./datafiles and print how many there are
+
+print("Creating list of genes (gene_list) from files...")
+print("There are", len(file_list)+1, "files in the folder") # Print the file count of the path (+1 to make it human readable)
+print("There are currently", gene_list.count(), "files in the gene list")
+if list_count==1:
+    print("There is currently", list_count, "entries in gene_list")
+    
+#file_list is now a string list...
+    
+                        #2. For each file: Open the file and convert it to a dictionary
+
+for i in range(len(file_list)): #For each file in the list...
+    
+    print("Opening files...")
+    
+gene = open(r'datafiles/'+file_list[i], "r") # Open the [i] file from file_list
+rd_gene = gene.read() #Read file as string and store as rp_gene
+sp_gene = rd_gene.split() #Split the rd_gene string into a list
+
+    print("There are", len(sp_gene), "elements in this file")
+    print("Creating keys and values...")
+    
+    keys=sp_gene[0:21] # Create list for keys
+    values=sp_gene[21:42] # Create list for values
+    
+    print("Keys and values generated! Hell yeah.")
+    print("Converting to dictionary...")
+    
+    gene_dict=dict(zip(keys,values)) # Combines keys and values into a dictionary
+    
+    print("Updating list...")
+    
+    gene_list.append(gene_dict)
+    
+    print("Aw yiss... It worked")
+    
+=====================
+
+#Compare WildType and Mutant sequences length
+blah = 22
+print(len(gene_list[blah]['WildType.Sequence']))
+print(len(gene_list[blah]['Mutant.Sequence']))
+
+#How can we detect mutations from this?
+
+if gene_list[blah]['WildType.Sequence']!=gene_list[blah]['Mutant.Sequence']:
+        print("Mutations found")
+
+======================
+
+#Produce an average from replicants
+#print(gene_list[n]['mRNA.Expression.WT.Rep1'],gene_list[n]['mRNA.Expression.WT.Rep2'],gene_list[n]['mRNA.Expression.WT.Rep3'])
+
+n = 36
+
+#Calculate average for wild type mRNA expression
+mRNA_exp_WT = gene_list[n]['mRNA.Expression.WT.Rep1'],gene_list[n]['mRNA.Expression.WT.Rep2'],gene_list[n]['mRNA.Expression.WT.Rep3']
+WTmRNA_avg = mean(float(n) for n in mRNA_exp_WT if n)
+print("Wild Type mRNA expression =", WTmRNA_avg)
+
+#Calculate average for mutant mRNA expression
+mRNA_exp_MU = gene_list[n]['mRNA.Expression.Mut.Rep1'],gene_list[n]['mRNA.Expression.Mut.Rep2'],gene_list[n]['mRNA.Expression.Mut.Rep3']
+MUmRNA_avg = mean(float(n) for n in mRNA_exp_MU if n)
+print("Mutant mRNA expression =", MUmRNA_avg)
+
+#Calculate average for wild type protein expression
+prot_exp_WT = gene_list[n]['Protein.Expression.WT.Rep1'],gene_list[n]['Protein.Expression.WT.Rep2'],gene_list[n]['Protein.Expression.WT.Rep3']
+WTprot_avg = mean(float(n) for n in prot_exp_WT if n)
+print("Wild type protein expression =", WTprot_avg)
+
+#Calculate average for mutant protein expression
+prot_exp_MU = gene_list[n]['Protein.Expression.Mut.Rep1'],gene_list[n]['Protein.Expression.Mut.Rep2'],gene_list[n]['Protein.Expression.Mut.Rep3']
+MUprot_avg = mean(float(n) for n in prot_exp_MU if n)
+print("Wild type protein expression =", MUprot_avg)
+
+#Calculate average for wild type cell viability
+CellVia_WT = gene_list[n]['CellViability.WT.Rep1'],gene_list[n]['CellViability.WT.Rep2'],gene_list[n]['CellViability.WT.Rep3']
+WTCellVia_avg = mean(float(n) for n in CellVia_WT if n)
+print("Wild type cell viability =", WTCellVia_avg)
+
+#Calculate average for mutant cell viability
+CellVia_MU = gene_list[n]['CellViability.Mut.Rep1'],gene_list[n]['CellViability.Mut.Rep2'],gene_list[n]['CellViability.Mut.Rep3']
+MUCellVia_avg = mean(float(n) for n in CellVia_MU if n)
+print("Wild type cell viability =", MUCellVia_avg)
