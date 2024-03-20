@@ -5,7 +5,6 @@ import statistics # Library to allow statistical operations
 import pandas # Library for data handling
 import matplotlib # Library for data presentation
 import matplotlib.pyplot as plt
-import seaborn as sbn # Module for matplotlib
 
 #Global variables
 gene_list=[]
