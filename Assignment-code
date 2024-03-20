@@ -309,3 +309,10 @@ plt.show()
 
 ###################
 
+#Code for brute-forcing through data lists where Y is an index number
+
+Y=0
+print(Y)
+print("Viability",gene_list[Y]['CellViability.Mut.Rep1'],gene_list[Y]['CellViability.Mut.Rep2'],gene_list[Y]['CellViability.Mut.Rep3'])
+print("mRNA",gene_list[Y]['mRNA.Expression.Mut.Rep1'],gene_list[Y]['mRNA.Expression.Mut.Rep2'],gene_list[Y]['mRNA.Expression.Mut.Rep3'])
+print("Protein",gene_list[Y]['Protein.Expression.Mut.Rep1'],gene_list[Y]['Protein.Expression.Mut.Rep2'],gene_list[Y]['Protein.Expression.Mut.Rep3'])
