@@ -1,3 +1,5 @@
+# Apologies for the spaghetti code
+
 import os # Library to allow operating system interaction
 import statistics # Library to allow statistical operations
 import pandas # Library for data handling
@@ -7,101 +9,304 @@ import seaborn as sbn # Module for matplotlib
 
 #Global variables
 gene_list=[]
-list_count=0 #Number of 
 data_path = r"datafiles" # Folder where data files are stored
 file_list = os.listdir(data_path) # Present all files in this folder as list
 
-#All data files have the same structure and each value is separated by whitespace
-#There are 42 elements in each file
-#"Indexing and slicing..."
-
-#Workflow:
-#Create data_list and populate it
-#Open file > Split string into two lists: indices and values > Combine key and value lists into a dictionary > Store the dictionary into gene_list
-
-
-                    #1. #Count the number of data files in ./datafiles and print how many there are
+##########
 
 print("Creating list of genes (gene_list) from files...")
 print("There are", len(file_list)+1, "files in the folder") # Print the file count of the path (+1 to make it human readable)
-print("There are currently", gene_list.count(), "files in the gene list")
-if list_count==1:
-    print("There is currently", list_count, "entries in gene_list")
+print("The files in the folder are:")
+print(file_list)
+
+##########
+
+#Create list of gene dictionaries
+
+for i in range(len(file_list)):
+        
+        #print("Opening file...")      
+        
+        gene = open(r'datafiles/'+file_list[i], "r") # Open the i file in file_list
+        rd_gene = gene.read() #Read file as string and store as rp_gene
+        sp_gene = rd_gene.split() #Split the rd_gene string into a list
+
+        #print("There are", len(sp_gene), "elements in this file")
+        #print("Creating keys and values...")
+
+        keys=sp_gene[0:21] # Create list for keys
+        values=sp_gene[21:42] # Create list for values
+
+        #print("Keys and values generated! Hell yeah.")
+        #print("Converting file to dictionary...")
+
+        gene_dict=dict(zip(keys,values)) # Combines keys and values into a dictionary
+
+        #print("Updating gene list...")
+
+        gene_list.append(gene_dict) # Append resulting dictionary to the list of genes
+
+        #print("Aw yiss... It worked")
+        
+##########
+
+#Compare wild type and mutant sequences of each gene and categorise them:
+
+del_genes=[] #To be used as keys to access dictionary
+ins_genes=[] #To be used as keys to access dictionary
+sub_genes=[] #To be used as keys to access dictionary
+nomu_genes=[] #To be used as keys to access dictionary
+
+for i in range(len(gene_list)):
     
-#file_list is now a string list...
+    WTseq_length = len(gene_list[i]['WildType.Sequence']) #Fetch wildtype sequence
+    MUseq_length = len(gene_list[i]['Mutant.Sequence']) #Fetch mutant sequence
+
+    if WTseq_length!=MUseq_length: #Check for sequence mismatch
+            #print("Mutation found")
+            sub_genes.append(gene_list[i]["Gene"])
+
+    if WTseq_length>MUseq_length: #Check for deletion
+            #print("Deletion mutation found")
+            del_genes.append(gene_list[i]["Gene"])
+            
+    if WTseq_length<MUseq_length: # Check for insertion
+            #print("Insertion mutation found")
+            ins_genes.append(gene_list[i]["Gene"])
+
+    elif WTseq_length==MUseq_length: #If none of the above have been detected, there are no mutations
+            #print("No mutations found")
+            nomu_genes.append(gene_list[i]["Gene"])
+            
+############
+
+#Manually generated lists of gene indices with corresponding mutations
+
+del_list=[3,18,25,26,28,29,31,34,36,37,38,39,44,47,48]
+ins_list=[1,4,7,8,9,15,16,17,19,20,24,32,41]
+sub_list=[1,3,4,7,8,9,15,16,17,18,19,20,24,25,26,28,29,31,32,34,36,37,38,39,41,44,47,48]
+nomu_list=[0,2,5,6,10,11,12,13,14,27,30,33,35,40,42,43,45,46]
+
+##############
+
+#Creating lists of data to be used for plotting in matplotlib
+
+nomu_mutvia=[] #All mutant cell viability values for non-mutant genes are stored here
+del_mutvia=[] #All mutant cell viability values for deletion mutants are stored here
+ins_mutvia=[] #All mutant cell viability values for insertion mutants are stored here
+sub_mutvia=[] #All mutant cell viability values for insertion mutants are stored here
+    #Although these are floats, THEY ARE STORED AS STRINGS!!
+
+for nomu_list in gene_list: #For each named gene in list of genes
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    nomu_mutvia.append(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    nomu_mutvia.append(gene_list[nomu_genes]['CellViability.Mut.Rep2'])
+    #nomu_mutvia.append(gene_list[nomu_genes]['CellViability.Mut.Rep3'])
+       
+for del_list in gene_list:
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    del_mutvia.append(gene_list[del_genes]['CellViability.Mut.Rep1'])
+    del_mutvia.append(gene_list[del_genes]['CellViability.Mut.Rep2'])
+    #del_mutvia.append(gene_list[del_genes]['CellViability.Mut.Rep3'])
+
+for ins_list in gene_list:
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    ins_mutvia.append(gene_list[ins_genes]['CellViability.Mut.Rep1'])
+    ins_mutvia.append(gene_list[ins_genes]['CellViability.Mut.Rep2'])
+    #del_mutvia.append(gene_list[del_genes]['CellViability.Mut.Rep3'])
+
+for sub_list in gene_list:
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    sub_mutvia.append(gene_list[sub_genes]['CellViability.Mut.Rep1'])
+    sub_mutvia.append(gene_list[sub_genes]['CellViability.Mut.Rep2'])
+    #del_mutvia.append(gene_list[del_genes]['CellViability.Mut.Rep3'])
     
-                        #2. For each file: Open the file and convert it to a dictionary
+#WHY ARE THESE NUMBERS STRINGS????
 
-for i in range(len(file_list)): #For each file in the list...
+# !!! ChatGPT-aided code !!!
+
+    #"I have a list of numbers stored as strings in python. How can I parse it so that the strings are float values?"
     
-    print("Opening files...")
+nomu_mutvia = [float(i) for i in nomu_mutvia]
+del_mutvia = [float(i) for i in del_mutvia]
+ins_mutvia = [float(i) for i in ins_mutvia]
+sub_mutvia = [float(i) for i in sub_mutvia]
+
+# !!! End of ChatGPT-aided code !!!
+
+# Original lists are now updated with float data instead of strings
+
+
+##################
+
+#Matplotlib - Box plots of cell viabilities across mutation types
+
+# Creating dataset 
+Data_1 = del_mutvia #List of cell viability data for deletions (Float)
+data_2 = ins_mutvia #List of cell viability data for insertions
+data_3 = sub_mutvia #List of cell viability data for substitutions
+data_4 = nomu_mutvia #List of cell viability data for no mutations
+data = [data_1, data_2, data_3, data_4]
+
+fig = plt.figure(figsize =(10, 7)) #Canvas parameters
+
+# Creating axes instance
+ax = fig.add_axes([0, 0, 1, 1])
+ 
+# Creating plot
+bp = ax.boxplot(data)
+
+#Axis and figure title
+plt.xlabel("Mutation class")
+plt.ylabel("Cell viability")
+plt.title("Cell viability between mutation types")
+
+plt.show()
+
+##############
+
+#Creating dataset for mutant mRNA expression 
+
+nomu_mrnaexp=[] #All mutant mRNA expression values for non-mutant genes are stored here
+del_mrnaexp=[] #All mutant mRNA expression values for deletion mutants are stored here
+ins_mrnaexp=[] #All mutant mRNA expression values for insertion mutants are stored here
+sub_mrnaexp=[] #All mutant mRNA expression values for insertion mutants are stored here
+    #Although these are floats, THEY ARE STORED AS STRINGS!!
+
+for nomu_list in gene_list: #For each named gene in list of genes
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    nomu_mrnaexp.append(gene_list[nomu_genes]['mRNA.Expression.Mut.Rep1'])
+    nomu_mrnaexp.append(gene_list[nomu_genes]['mRNA.Expression.Mut.Rep2'])
+    nomu_mrnaexp.append(gene_list[nomu_genes]['mRNA.Expression.Mut.Rep3'])
+       
+for del_list in gene_list:
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    del_mrnaexp.append(gene_list[del_genes]['mRNA.Expression.Mut.Rep1'])
+    del_mrnaexp.append(gene_list[del_genes]['mRNA.Expression.Mut.Rep2'])
+    del_mrnaexp.append(gene_list[del_genes]['mRNA.Expression.Mut.Rep3'])
+
+for ins_list in gene_list:
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    ins_mrnaexp.append(gene_list[ins_genes]['mRNA.Expression.Mut.Rep1'])
+    ins_mrnaexp.append(gene_list[ins_genes]['mRNA.Expression.Mut.Rep2'])
+    del_mrnaexp.append(gene_list[del_genes]['mRNA.Expression.Mut.Rep3'])
+
+for sub_list in gene_list:
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    sub_mrnaexp.append(gene_list[sub_genes]['mRNA.Expression.Mut.Rep1'])
+    sub_mrnaexp.append(gene_list[sub_genes]['mRNA.Expression.Mut.Rep2'])
+    del_mrnaexp.append(gene_list[del_genes]['mRNA.Expression.Mut.Rep3'])
     
-gene = open(r'datafiles/'+file_list[i], "r") # Open the [i] file from file_list
-rd_gene = gene.read() #Read file as string and store as rp_gene
-sp_gene = rd_gene.split() #Split the rd_gene string into a list
+#WHY ARE THESE NUMBERS STRINGS????
 
-    print("There are", len(sp_gene), "elements in this file")
-    print("Creating keys and values...")
+# !!! ChatGPT-aided code !!!
+
+    #"I have a list of numbers stored as strings in python. How can I parse it so that the strings are float values?"
+
+nomu_mrnaexp = [float(i) for i in nomu_mutvia]
+del_mrnaexp = [float(i) for i in del_mutvia]
+ins_mrnaexp = [float(i) for i in ins_mutvia]
+sub_mrnaexp = [float(i) for i in sub_mutvia]
+
+# !!! End of ChatGPT-aided code !!!
+
+######################
+
+#Matplotlib - Box plots of mRNA expression across mutation types
+
+# Creating dataset 
+data_1 = nomu_mrnaexp #List of cell viability data for deletions (Float)
+data_2 = ins_mrnaexp #List of cell viability data for insertions
+data_3 = sub_mrnaexp #List of cell viability data for substitutions
+data_4 = nomu_mrnaexp #List of cell viability data for no mutations
+data = [data_1, data_2, data_3, data_4]
+
+fig = plt.figure(figsize =(10, 7)) #Canvas parameters
+
+# Creating axes instance
+ax = fig.add_axes([0, 0, 1, 1])
+ 
+# Creating plot
+bp = ax.boxplot(data)
+
+#Axis and figure title
+plt.xlabel("Mutation class")
+plt.ylabel("mRNA expression")
+plt.title("mRNA expression between mutation types")
+
+plt.show()
+
+################
+
+#Creating dataset for mutant protein expression and plotting in matplotlib
+
+nomu_protexp=[] #All mutant protein expression values for non-mutant genes are stored here
+del_protexp=[] #All mutant protein expression values for deletion mutants are stored here
+ins_protexp=[] #All mutant protein expression values for insertion mutants are stored here
+sub_protexp=[] #All mutant protein expression values for insertion mutants are stored here
+    #Although these are floats, THEY ARE STORED AS STRINGS!!
+
+for nomu_list in gene_list: #For each named gene in list of genes
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    nomu_protexp.append(gene_list[nomu_genes]['Protein.Expression.Mut.Rep1'])
+    nomu_protexp.append(gene_list[nomu_genes]['Protein.Expression.Mut.Rep2'])
+    nomu_protexp.append(gene_list[nomu_genes]['Protein.Expression.Mut.Rep3'])
+       
+for del_list in gene_list:
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    del_protexp.append(gene_list[del_genes]['Protein.Expression.Mut.Rep1'])
+    del_protexp.append(gene_list[del_genes]['Protein.Expression.Mut.Rep2'])
+    del_protexp.append(gene_list[del_genes]['Protein.Expression.Mut.Rep3'])
+
+for ins_list in gene_list:
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    ins_protexp.append(gene_list[ins_genes]['Protein.Expression.Mut.Rep1'])
+    ins_protexp.append(gene_list[ins_genes]['Protein.Expression.Mut.Rep2'])
+    ins_protexp.append(gene_list[ins_genes]['Protein.Expression.Mut.Rep3'])
+
+for sub_list in gene_list:
+    #print(gene_list[nomu_genes]['CellViability.Mut.Rep1'])
+    sub_protexp.append(gene_list[sub_genes]['Protein.Expression.Mut.Rep1'])
+    sub_protexp.append(gene_list[sub_genes]['Protein.Expression.Mut.Rep2'])
+    sub_protexp.append(gene_list[sub_genes]['Protein.Expression.Mut.Rep3'])
     
-    keys=sp_gene[0:21] # Create list for keys
-    values=sp_gene[21:42] # Create list for values
-    
-    print("Keys and values generated! Hell yeah.")
-    print("Converting to dictionary...")
-    
-    gene_dict=dict(zip(keys,values)) # Combines keys and values into a dictionary
-    
-    print("Updating list...")
-    
-    gene_list.append(gene_dict)
-    
-    print("Aw yiss... It worked")
-    
-=====================
+#WHY ARE THESE NUMBERS STRINGS????
 
-#Compare WildType and Mutant sequences length
-blah = 22
-print(len(gene_list[blah]['WildType.Sequence']))
-print(len(gene_list[blah]['Mutant.Sequence']))
+# !!! ChatGPT-aided code !!!
 
-#How can we detect mutations from this?
+    #"I have a list of numbers stored as strings in python. How can I parse it so that the strings are float values?"
 
-if gene_list[blah]['WildType.Sequence']!=gene_list[blah]['Mutant.Sequence']:
-        print("Mutations found")
+nomu_protexp = [float(i) for i in nomu_protexp]
+del_protexp = [float(i) for i in del_protexp]
+ins_protexp = [float(i) for i in ins_protexp]
+sub_protexp = [float(i) for i in sub_protexp]
 
-======================
+# !!! End of ChatGPT-aided code !!!
 
-#Produce an average from replicants
-#print(gene_list[n]['mRNA.Expression.WT.Rep1'],gene_list[n]['mRNA.Expression.WT.Rep2'],gene_list[n]['mRNA.Expression.WT.Rep3'])
 
-n = 36
+#Matplotlib - Box plots of protein expression across mutation types
 
-#Calculate average for wild type mRNA expression
-mRNA_exp_WT = gene_list[n]['mRNA.Expression.WT.Rep1'],gene_list[n]['mRNA.Expression.WT.Rep2'],gene_list[n]['mRNA.Expression.WT.Rep3']
-WTmRNA_avg = mean(float(n) for n in mRNA_exp_WT if n)
-print("Wild Type mRNA expression =", WTmRNA_avg)
+# Creating dataset 
+data_1 = nomu_protexp #List of cell viability data for deletions (Float)
+data_2 = ins_protexp #List of cell viability data for insertions
+data_3 = sub_protexp #List of cell viability data for substitutions
+data_4 = nomu_protexp #List of cell viability data for no mutations
+data = [data_1, data_2, data_3, data_4]
 
-#Calculate average for mutant mRNA expression
-mRNA_exp_MU = gene_list[n]['mRNA.Expression.Mut.Rep1'],gene_list[n]['mRNA.Expression.Mut.Rep2'],gene_list[n]['mRNA.Expression.Mut.Rep3']
-MUmRNA_avg = mean(float(n) for n in mRNA_exp_MU if n)
-print("Mutant mRNA expression =", MUmRNA_avg)
+fig = plt.figure(figsize =(10, 7)) #Canvas parameters
 
-#Calculate average for wild type protein expression
-prot_exp_WT = gene_list[n]['Protein.Expression.WT.Rep1'],gene_list[n]['Protein.Expression.WT.Rep2'],gene_list[n]['Protein.Expression.WT.Rep3']
-WTprot_avg = mean(float(n) for n in prot_exp_WT if n)
-print("Wild type protein expression =", WTprot_avg)
+# Creating axes instance
+ax = fig.add_axes([0, 0, 1, 1])
+ 
+# Creating plot
+bp = ax.boxplot(data)
 
-#Calculate average for mutant protein expression
-prot_exp_MU = gene_list[n]['Protein.Expression.Mut.Rep1'],gene_list[n]['Protein.Expression.Mut.Rep2'],gene_list[n]['Protein.Expression.Mut.Rep3']
-MUprot_avg = mean(float(n) for n in prot_exp_MU if n)
-print("Wild type protein expression =", MUprot_avg)
+#Axis and figure title
+plt.xlabel("Mutation class")
+plt.ylabel("Protein expression")
+plt.title("Protein expression between mutation types")
 
-#Calculate average for wild type cell viability
-CellVia_WT = gene_list[n]['CellViability.WT.Rep1'],gene_list[n]['CellViability.WT.Rep2'],gene_list[n]['CellViability.WT.Rep3']
-WTCellVia_avg = mean(float(n) for n in CellVia_WT if n)
-print("Wild type cell viability =", WTCellVia_avg)
+plt.show()
 
-#Calculate average for mutant cell viability
-CellVia_MU = gene_list[n]['CellViability.Mut.Rep1'],gene_list[n]['CellViability.Mut.Rep2'],gene_list[n]['CellViability.Mut.Rep3']
-MUCellVia_avg = mean(float(n) for n in CellVia_MU if n)
-print("Wild type cell viability =", MUCellVia_avg)
+###################
+
